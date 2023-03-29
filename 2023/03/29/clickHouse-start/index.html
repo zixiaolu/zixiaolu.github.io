@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>clickHouse-start | InIt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="ClickHouse1.简述目前主要在使用protoBuff进行战报的压缩与传输，明文字符串保存玩家日志，二者都是使用MySQL进行保存，目前遇到的主要问题是：数据量过大导致MySQL保存的效率过低，容量增速过快。 目前采用的protoBuff协议会将数据转化为二进制进行保存，对于数据有一定的压缩效果，但是对于长字符串进行的压缩效率相对不高，但是相对的，使用ProtoBuff对于战报请求响应优化，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="clickHouse-start">
+<meta property="og:url" content="http://example.com/2023/03/29/clickHouse-start/index.html">
+<meta property="og:site_name" content="InIt">
+<meta property="og:description" content="ClickHouse1.简述目前主要在使用protoBuff进行战报的压缩与传输，明文字符串保存玩家日志，二者都是使用MySQL进行保存，目前遇到的主要问题是：数据量过大导致MySQL保存的效率过低，容量增速过快。 目前采用的protoBuff协议会将数据转化为二进制进行保存，对于数据有一定的压缩效果，但是对于长字符串进行的压缩效率相对不高，但是相对的，使用ProtoBuff对于战报请求响应优化，">
+<meta property="og:locale">
+<meta property="article:published_time" content="2023-03-29T03:35:53.000Z">
+<meta property="article:modified_time" content="2023-03-29T03:36:13.801Z">
+<meta property="article:author" content="zixiaolu">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="InIt" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">InIt</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Suche"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Suche"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-clickHouse-start" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/03/29/clickHouse-start/" class="article-date">
+  <time class="dt-published" datetime="2023-03-29T03:35:53.000Z" itemprop="datePublished">2023-03-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      clickHouse-start
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="ClickHouse"><a href="#ClickHouse" class="headerlink" title="ClickHouse"></a>ClickHouse</h1><h2 id="1-简述"><a href="#1-简述" class="headerlink" title="1.简述"></a>1.简述</h2><p>目前主要在使用protoBuff进行战报的压缩与传输，明文字符串保存玩家日志，二者都是使用MySQL进行保存，目前遇到的主要问题是：数据量过大导致MySQL保存的效率过低，容量增速过快。</p>
+<p>目前采用的protoBuff协议会将数据转化为二进制进行保存，对于数据有一定的压缩效果，但是对于长字符串进行的压缩效率相对不高，但是相对的，使用ProtoBuff对于战报请求响应优化，理论上来说是相对较好的。</p>
+<p>目标引入的ClickHouse本身属于一种大数据处理的列式数据库，引入的主要考量是希望发挥其压缩数据的优势，使得存储的日志，战报占用空间更小，能够保存的时间跨度更长。但是引入了高级的数据压缩，势必会造成查询时间的增加，这里就需要针对非时间敏感的日志服务于时间敏感的战报服务进行对应的调研考量。</p>
+<p>那么主要需要调研的部分就是：</p>
+<ul>
+<li>数据的压缩比(战报与日志)</li>
+<li>数据的查询效率</li>
+<li>接入框架所需要的成本</li>
+</ul>
+<h2 id="2-调研"><a href="#2-调研" class="headerlink" title="2.调研"></a>2.调研</h2><ul>
+<li><p>数据压缩比<br>  首先当前MySQL部分的情况统计</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">use information_schema;</span><br><span class="line">select concat(round(sum(DATA_LENGTH/1024/1024),2),&#x27;MB&#x27;) as data_size from TABLES where table_schema=&#x27;DATABASE_NAME&#x27; and table_name=&#x27;TABLE_NAME&#x27;;</span><br></pre></td></tr></table></figure>
+<p>  使用上述的SQL语句对内网的日志库中的定时器日志进行查询，对应计算出22180条日志占用了2.79MB的空间</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+<p>  接下来在查询同样2w条数据在ClickHouse中进行了一次占用查询统计，在同样的结构保存同样的数据的情况下，ClickHouse的数据库占用情况仅为254k，这跟前序调研中预期的ClickHouse的数据压缩比预期是相匹配的。</p>
+</li>
+<li><p>数据查询效率<br>  数据查询效率的实验方式为本地搭建一个ClickHouse实例，并使用官方的JDBC进行查询测试，查询的主要实现代码可以参考</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/zixiaolu/confDemo.git</span><br></pre></td></tr></table></figure>
+<p>  查询测试的结果如下：</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">jdbc做随机效率查询1000次单条数据，统计10次</span><br><span class="line">（单线程模式）</span><br><span class="line">次数  耗时(ns)</span><br><span class="line">1     20737213800</span><br><span class="line">2     12723988000</span><br><span class="line">3     13455663800</span><br><span class="line">4     21528467000</span><br><span class="line">5     16679333900</span><br><span class="line">6     19076403700</span><br><span class="line">7     18067997700</span><br><span class="line">8     17245566900</span><br><span class="line">9     17588234700</span><br><span class="line">10    17910230500</span><br><span class="line">---------------------------------------------</span><br><span class="line">减小SQL查询次数，提高单条SQL返回的结果集</span><br><span class="line">进行了10次数据规模在1w左右的查询,统计了10次</span><br><span class="line">次数  耗时(ns)</span><br><span class="line">1     286191700</span><br><span class="line">2     302271300</span><br><span class="line">3     206975500</span><br><span class="line">4     209055000</span><br><span class="line">5     214881800</span><br><span class="line">6     214939100</span><br><span class="line">7     180398600</span><br><span class="line">8     184695800</span><br><span class="line">9     176832400</span><br><span class="line">10    200993800</span><br><span class="line">---------------------------------------------</span><br><span class="line">接下来进行并发测试，测试并发情况下直连clickHouse其处理请求参数</span><br><span class="line">10个线程进行并发测试，每个线程进行1000次查询</span><br><span class="line">Thread-3-&gt;62130588200</span><br><span class="line">Thread-1-&gt;62617361100</span><br><span class="line">Thread-4-&gt;62626009700</span><br><span class="line">Thread-7-&gt;62616700200</span><br><span class="line">Thread-2-&gt;63056207500</span><br><span class="line">Thread-8-&gt;63089547300</span><br><span class="line">Thread-0-&gt;63111530800</span><br><span class="line">Thread-9-&gt;63218258500</span><br><span class="line">Thread-6-&gt;63260582500</span><br><span class="line">Thread-5-&gt;63578782600</span><br><span class="line"></span><br><span class="line">按照控制变量的方式测试了单次连接查询&quot;select 1&quot;语句时得到的时延</span><br><span class="line">可以近似得到后建立一次连接时需要消耗平均4ms的时延</span><br></pre></td></tr></table></figure>
+<p>  总体的查询结果上来看：</p>
+<ul>
+<li>单线程下对于每次查询的时延约为17ms</li>
+<li>多线程下对于每次查询的时延约为62ms</li>
+</ul>
+<p>  从效率的角度上来说感觉还是与预期不是特别的符合，还需要与当前的MySQL方式进行比对，获得一个评估的标准值。</p>
+</li>
+<li><p>接入框架中对应的效果</p>
+</li>
+</ul>
+<h2 id="3-原理"><a href="#3-原理" class="headerlink" title="3.原理"></a>3.原理</h2><p>在深入了解了ClickHouse的特点之后，对于其中的特点与实现原理，还是相当好奇的</p>
+<ol>
+<li>ClickHouse的压缩算法与实现效率</li>
+</ol>
+<p>ClickHouse提供的压缩算法，都是成熟的在数学上严谨证明的算法，比如最重要的LZ4算法，压缩效果不言而喻。<br>但是对于压缩算法的实现效率与消耗，这部分逻辑是通过哪一方进行执行的呢？<br>ChatGPT给我的答案是这样的:</p>
+<hr>
+<p>在ClickHouse中，字典表是由处理方（即ClickHouse服务器）来维护和管理的。当使用字典压缩算法存储数据时，ClickHouse会将字符串值存储到一个字典表中，并将每个字符串值映射到一个唯一的整数值。在读取数据时，ClickHouse服务器会查找字典表，将整数值转换回原始字符串值，然后将结果返回给请求方</p>
+<hr>
+<p>但是我对ChatGPT的说法不是十分的认可<br>实际在进行了Java端的测试后，有几个间接证据其实与上述逻辑不是很相符</p>
+<ol>
+<li>Java端的ClickHouse引入后，使用JDBC进行查询时，会回报一个缺少LZ4解码依赖的异常，这可能是因为需要客户端进行对应的解码而导致的。</li>
+<li>Java端使用JDBC进行查询测试时，以基准测试执行”select 1”语句得到连接开销大约为2ms的响应，但是在查询单条数据时，该时间可能膨胀到10ms以上，膨胀的时间可能是由携带数据过多导致，也可能是由于客户端进行了对应的LZ4解码操作导致的。</li>
+<li>ClickHouse的设计中，对网络传输与IO传输都进行了优化，提高数据传输效率中，降低传输数据的大小也是很有效的一个设计；于是在IO与网络传输中，优先采用压缩后的数据进行传输也能对数据传输进行不小的提升。</li>
+</ol>
+<p>所以看起来合理的逻辑是：原始数据到达了ClickHouse后，由ClickHouse方进行了指定方式的数据压缩，然后在磁盘IO与网络IO中都使用了对应的压缩后数据，由查询客户端进行对应的解压缩操作。</p>
+<p>在进行了调研与实验之后，找到了证明对应猜测的证据，即对应的ClickHouse在Java端实现的客户端中存在对应的初始设置：</p>
+<ul>
+<li>compressRequest：发送请求是否进行压缩</li>
+<li>compressAlgorithm：指定的压缩算法</li>
+<li>decompressResponse：收到数据是否进行解压缩</li>
+<li>decompressAlgorithm：指定解压缩算法</li>
+</ul>
+<p>默认在使用JDBC查询对应的数据时，会将decompressResponse的选项打开</p>
+<ol start="2">
+<li>LSM tree</li>
+</ol>
+<p>Clickhouse会在插入后大约15分钟合并数据片段，也可以使用OPTIMEZE语句执行计划外的合并<br>非激活的片段(active&#x3D;0片段)将在合并后约10分钟被删除</p>
+<p>ClickHouse并不推荐小批量高并发写入，更加推荐大批量，小并发写入，官方建议每批数据1000行起步，或者每秒进行一次插入，这样做的主要目的是减小merge次数，因为clickhouse的写入方式称作”原子写入”，每一个原子写入都创建一个数据Part，而后台进行merge时就是合并这些Part部分<br><a target="_blank" rel="noopener" href="https://clickhouse.com/docs/en/concepts/why-clickhouse-is-so-fast#performance-when-inserting-data">https://clickhouse.com/docs/en/concepts/why-clickhouse-is-so-fast#performance-when-inserting-data</a></p>
+<p>ClickHouse目前利用SSE4.2指令集实现向量化执行。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/03/29/clickHouse-start/" data-id="clft4yeea0000ektp0cshai2v" data-title="clickHouse-start" class="article-share-link">Teilen</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">March 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/03/29/clickHouse-start/">clickHouse-start</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 zixiaolu<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
