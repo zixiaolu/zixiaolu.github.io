@@ -74,7 +74,7 @@
     <article id="post-clickHouse-start" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/03/29/clickHouse-start/" class="article-date">
-  <time class="dt-published" datetime="2023-03-29T03:35:53.000Z" itemprop="datePublished">2023-03-29</time>
+  <time class="dt-published" datetime="2023-03-29T02:36:09.000Z" itemprop="datePublished">2023-03-29</time>
 </a>
     
   </div>
@@ -112,10 +112,10 @@
 <li><p>数据查询效率<br>  数据查询效率的实验方式为本地搭建一个ClickHouse实例，并使用官方的JDBC进行查询测试，查询的主要实现代码可以参考</p>
   <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://github.com/zixiaolu/confDemo.git</span><br></pre></td></tr></table></figure>
 <p>  查询测试的结果如下：</p>
-  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">jdbc做随机效率查询1000次单条数据，统计10次</span><br><span class="line">（单线程模式）</span><br><span class="line">次数  耗时(ns)</span><br><span class="line">1     20737213800</span><br><span class="line">2     12723988000</span><br><span class="line">3     13455663800</span><br><span class="line">4     21528467000</span><br><span class="line">5     16679333900</span><br><span class="line">6     19076403700</span><br><span class="line">7     18067997700</span><br><span class="line">8     17245566900</span><br><span class="line">9     17588234700</span><br><span class="line">10    17910230500</span><br><span class="line">---------------------------------------------</span><br><span class="line">减小SQL查询次数，提高单条SQL返回的结果集</span><br><span class="line">进行了10次数据规模在1w左右的查询,统计了10次</span><br><span class="line">次数  耗时(ns)</span><br><span class="line">1     286191700</span><br><span class="line">2     302271300</span><br><span class="line">3     206975500</span><br><span class="line">4     209055000</span><br><span class="line">5     214881800</span><br><span class="line">6     214939100</span><br><span class="line">7     180398600</span><br><span class="line">8     184695800</span><br><span class="line">9     176832400</span><br><span class="line">10    200993800</span><br><span class="line">---------------------------------------------</span><br><span class="line">接下来进行并发测试，测试并发情况下直连clickHouse其处理请求参数</span><br><span class="line">10个线程进行并发测试，每个线程进行1000次查询</span><br><span class="line">Thread-3-&gt;62130588200</span><br><span class="line">Thread-1-&gt;62617361100</span><br><span class="line">Thread-4-&gt;62626009700</span><br><span class="line">Thread-7-&gt;62616700200</span><br><span class="line">Thread-2-&gt;63056207500</span><br><span class="line">Thread-8-&gt;63089547300</span><br><span class="line">Thread-0-&gt;63111530800</span><br><span class="line">Thread-9-&gt;63218258500</span><br><span class="line">Thread-6-&gt;63260582500</span><br><span class="line">Thread-5-&gt;63578782600</span><br><span class="line"></span><br><span class="line">按照控制变量的方式测试了单次连接查询&quot;select 1&quot;语句时得到的时延</span><br><span class="line">可以近似得到后建立一次连接时需要消耗平均4ms的时延</span><br></pre></td></tr></table></figure>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">jdbc做随机效率查询1000次单条数据，统计10次</span><br><span class="line">（单线程模式）</span><br><span class="line">次数  耗时(ns)</span><br><span class="line">1     20737213800</span><br><span class="line">2     12723988000</span><br><span class="line">3     13455663800</span><br><span class="line">4     21528467000</span><br><span class="line">5     16679333900</span><br><span class="line">6     19076403700</span><br><span class="line">7     18067997700</span><br><span class="line">8     17245566900</span><br><span class="line">9     17588234700</span><br><span class="line">10    17910230500</span><br><span class="line">---------------------------------------------</span><br><span class="line">减小SQL查询次数，提高单条SQL返回的结果集</span><br><span class="line">进行了10次数据规模在1w左右的查询,统计了10次</span><br><span class="line">次数  耗时(ns)</span><br><span class="line">1     286191700</span><br><span class="line">2     302271300</span><br><span class="line">3     206975500</span><br><span class="line">4     209055000</span><br><span class="line">5     214881800</span><br><span class="line">6     214939100</span><br><span class="line">7     180398600</span><br><span class="line">8     184695800</span><br><span class="line">9     176832400</span><br><span class="line">10    200993800</span><br><span class="line">---------------------------------------------</span><br><span class="line">接下来进行并发测试，测试并发情况下直连clickHouse其处理请求参数</span><br><span class="line">10个线程进行并发测试，每个线程进行1000次查询</span><br><span class="line">Thread-3-&gt;62130588200</span><br><span class="line">Thread-1-&gt;62617361100</span><br><span class="line">Thread-4-&gt;62626009700</span><br><span class="line">Thread-7-&gt;62616700200</span><br><span class="line">Thread-2-&gt;63056207500</span><br><span class="line">Thread-8-&gt;63089547300</span><br><span class="line">Thread-0-&gt;63111530800</span><br><span class="line">Thread-9-&gt;63218258500</span><br><span class="line">Thread-6-&gt;63260582500</span><br><span class="line">Thread-5-&gt;63578782600</span><br><span class="line"></span><br><span class="line">按照控制变量的方式测试了单次连接查询&quot;select 1&quot;语句时得到的时延</span><br><span class="line">可以近似得到后建立一次连接时需要消耗平均4ms的时延</span><br><span class="line"></span><br><span class="line">MySQL数据库下，对应的1000条</span><br></pre></td></tr></table></figure>
 <p>  总体的查询结果上来看：</p>
 <ul>
-<li>单线程下对于每次查询的时延约为17ms</li>
+<li>单线程下对于每次查询的时延约为15-20ms</li>
 <li>多线程下对于每次查询的时延约为62ms</li>
 </ul>
 <p>  从效率的角度上来说感觉还是与预期不是特别的符合，还需要与当前的MySQL方式进行比对，获得一个评估的标准值。</p>
@@ -127,7 +127,9 @@
 <ol>
 <li>ClickHouse的压缩算法与实现效率</li>
 </ol>
-<p>ClickHouse提供的压缩算法，都是成熟的在数学上严谨证明的算法，比如最重要的LZ4算法，压缩效果不言而喻。<br>但是对于压缩算法的实现效率与消耗，这部分逻辑是通过哪一方进行执行的呢？<br>ChatGPT给我的答案是这样的:</p>
+<p>ClickHouse提供的压缩算法，都是成熟的在数学上严谨证明的算法，比如最重要的LZ4算法，压缩效果不言而喻。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">具体的关于ClickHouse中的LZ4算法的速度验证可以参考如下文章</span><br><span class="line">https://habr.com/en/company/yandex/blog/457612/</span><br></pre></td></tr></table></figure>
+<p>但是对于压缩算法的实现效率与消耗，这部分逻辑是通过哪一方进行执行的呢？<br>ChatGPT给我的答案是这样的:</p>
 <hr>
 <p>在ClickHouse中，字典表是由处理方（即ClickHouse服务器）来维护和管理的。当使用字典压缩算法存储数据时，ClickHouse会将字符串值存储到一个字典表中，并将每个字符串值映射到一个唯一的整数值。在读取数据时，ClickHouse服务器会查找字典表，将整数值转换回原始字符串值，然后将结果返回给请求方</p>
 <hr>
@@ -145,13 +147,29 @@
 <li>decompressResponse：收到数据是否进行解压缩</li>
 <li>decompressAlgorithm：指定解压缩算法</li>
 </ul>
-<p>默认在使用JDBC查询对应的数据时，会将decompressResponse的选项打开</p>
+<p>默认在使用JDBC查询对应的数据时，会将decompressResponse的选项打开，可以在创建连接前设置compress的参数，调整对应的compress数据</p>
+<p>然而接下来的实验结果却与设想存在一定的出入：<br>压缩数据的逻辑本身是由ClickHouse存储引擎维护的，在网络传输中的数据则是由参数确定是否进行对应的数据压缩，数据压缩的目的是为了降低数据在网络传输层的传输时间。所以，当ClickHouse从数据库中取出数据时，数据就已经是正确的完成了从数据库中的解压，成为了正常的可读数据。</p>
+<p>设想对了，也只对了一半~</p>
+<p>那么开启了传输压缩选项后对结果究竟是否存在优化呢？<br>答案是肯定的，在查询100w条数据的操作中，压缩选项的启用，确实使得获取结果的效率提升了10倍，但是对应的读取数据的时间相对的也提升了2倍。但即使是提升了2倍的读取时间，查询到最后的时延同样低于不进行压缩对网络进行传输，速率还是存在约为1倍的提升，可见对于大量数据传输时网络IO的瓶颈提升确实要比磁盘IO的提升更加有效。</p>
 <ol start="2">
-<li>LSM tree</li>
+<li>ClickHouse的并发读写情况</li>
 </ol>
-<p>Clickhouse会在插入后大约15分钟合并数据片段，也可以使用OPTIMEZE语句执行计划外的合并<br>非激活的片段(active&#x3D;0片段)将在合并后约10分钟被删除</p>
-<p>ClickHouse并不推荐小批量高并发写入，更加推荐大批量，小并发写入，官方建议每批数据1000行起步，或者每秒进行一次插入，这样做的主要目的是减小merge次数，因为clickhouse的写入方式称作”原子写入”，每一个原子写入都创建一个数据Part，而后台进行merge时就是合并这些Part部分<br><a target="_blank" rel="noopener" href="https://clickhouse.com/docs/en/concepts/why-clickhouse-is-so-fast#performance-when-inserting-data">https://clickhouse.com/docs/en/concepts/why-clickhouse-is-so-fast#performance-when-inserting-data</a></p>
-<p>ClickHouse目前利用SSE4.2指令集实现向量化执行。</p>
+<p>ClickHouse对并发操作的处理，在使用MergeTree引擎时可以很明显的从ClickHouse库中的表信息理解他们是怎么处理并发问题的：</p>
+<p>ClickHouse保存数据的方式是将数据分为许多块不同的数据分块，数据分块的结构是随着数据动态变化的，所以当表创建时，并不存在任意一块对应的数据块。</p>
+<p>CK进行数据插入操作时，会按照Insert语句向数据库中插入对应的数据，创建不同的数据分片，此时被插入的数据分片中都存在一个对应的Status状态，状态为compact的分片是新插入的数据存在的数据分片，这些分片将会进行Merge操作以Partation为主进行合并，形成大的数据块。</p>
+<p>CK进行删除操作时，也不是直接进行干脆明了的直接将数据从硬盘中抹去这一类的操作，而是会定位到该数据所在的数据块，将数据块读取后将对应的行的exist设置为1，或数据块打上active&#x3D;0的标记，这表示这些数据将会在未来被删除，此时进行的查询操作也会将这些数据排除在外。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">关于删除操作，需要注意区分mutation操作与delete命令之间的关系，具体可以参考这个文章</span><br><span class="line">https://clickhouse.com/blog/handling-updates-and-deletes-in-clickhouse</span><br></pre></td></tr></table></figure>
+<p>Clickhouse会在插入后大约15分钟合并数据片段，也可以使用OPTIMEZE语句执行计划外的合并，非激活的片段(active&#x3D;0片段)将在合并后约8分钟被删除。或者当CK检测到磁盘容量不足时，即进行一次对应的合并操作以删除无用的硬盘碎片。</p>
+<p>CK的插入原理显而易见的解释了官方的推荐操作：ClickHouse并不推荐小批量高并发写入，更加推荐大批量，小并发写入，官方建议每批数据1000行起步，或者每秒进行一次插入，这样做的主要目的是减小merge次数，因为clickhouse的写入方式称作”原子写入”，每一个原子写入都创建一个数据Part，而后台进行merge时就是合并这些Part部分。<br>不建议产生过多的分片的另一个原因，是CK引擎处理分片时可能会导致占用过多的内存，这点在上述Java客户端的插入实验时也能十分明显的感受到，对于单个插入操作的高并发测试时，CK的内存占用会极速膨胀。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">这是官方对插入操作时提出的部分使用建议。</span><br><span class="line">https://clickhouse.com/docs/en/concepts/why-clickhouse-is-so-fast#performance-when-inserting-data</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>CK单机单表快速查询的其他原因</li>
+</ol>
+<p>简而言之就是更多的使用了向量化执行，与设计时采用了LSM的数据结构，发挥了磁盘读写方面的特性。<br>ClickHouse目前利用SSE4.2指令集实现向量化执行。向量化执行大意是通过CPU的优化指令集，使得CPU可以以一种并行的方式处理部分数据（SIMD）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">对于原理也只是泛泛之谈，谈不上理解解，只是把别人的结论给自己记住尔尔~</span><br><span class="line">https://www.jianshu.com/p/fc384f18ff1a</span><br></pre></td></tr></table></figure>
+
+<p>CK使用LSM数据结构提升数据的查询速度。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://cloud.tencent.com/developer/article/1441835</span><br></pre></td></tr></table></figure>
 
       
     </div>
